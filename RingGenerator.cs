@@ -8,13 +8,19 @@ using System.Runtime.CompilerServices;
 using VMS.TPS.Common.Model.API;
 using VMS.TPS.Common.Model.Types;
 using System.Windows.Controls;
-using System.Collections.Generic;
+using System.Globalization;
 
+[assembly: AssemblyVersion("1.0.0.1")]
+[assembly: AssemblyFileVersion("1.0.0.1")]
+[assembly: AssemblyInformationalVersion("1.0")]
+// Mandatory for scripts that modify data (BeginModifications)
+[assembly: ESAPIScript(IsWriteable = true)]
 
 namespace VMS.TPS
 {
     public class Script
     {
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public void Execute(ScriptContext context)
         {
             // 1. Validaciones iniciales
@@ -127,9 +133,18 @@ namespace VMS.TPS
                     return;
                 }
 
-                double[] startDists = new double[] { double.Parse(txtR1Start.Text), double.Parse(txtR2Start.Text), double.Parse(txtR3Start.Text) };
-                double[] thicknesses = new double[] { double.Parse(txtR1Thick.Text), double.Parse(txtR2Thick.Text), double.Parse(txtR3Thick.Text) };
-                double skinFlash = double.Parse(txtSkinFlash.Text);
+                // ESAPI Best Practice: Use InvariantCulture so commas/dots don't break parsing on European machines
+                double[] startDists = new double[] { 
+                    double.Parse(txtR1Start.Text, CultureInfo.InvariantCulture), 
+                    double.Parse(txtR2Start.Text, CultureInfo.InvariantCulture), 
+                    double.Parse(txtR3Start.Text, CultureInfo.InvariantCulture) 
+                };
+                double[] thicknesses = new double[] { 
+                    double.Parse(txtR1Thick.Text, CultureInfo.InvariantCulture), 
+                    double.Parse(txtR2Thick.Text, CultureInfo.InvariantCulture), 
+                    double.Parse(txtR3Thick.Text, CultureInfo.InvariantCulture) 
+                };
+                double skinFlash = double.Parse(txtSkinFlash.Text, CultureInfo.InvariantCulture);
 
                 mainWindow.DialogResult = true;
                 mainWindow.Close();
