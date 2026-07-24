@@ -10,6 +10,8 @@ This script solves this by using advanced Boolean logic to automatically generat
 * **The "Onion Effect" (Zero Overlap):** Intelligently prevents ring overlapping by automatically subtracting inner shells from outer ones.
 * **Skin Sparing:** Automatically crops the generated rings inside the patient’s external body contour by a user-defined safety margin.
 * **OAR Intersections (Smart Cropping):** If a generated ring intersects with a selected Organ at Risk (OAR), the script automatically extracts that overlapping segment into a new sub-structure (e.g., `zR1_in_Rectum`). This allows the dosimetrist to apply distinct, precise optimization weights to the specific overlapping volume.
+* **Color-Coded Structures:** Each ring (`zRing1`, `zRing2`, `zRing3`) is assigned a distinct color instead of Eclipse's default magenta, so all three are easy to tell apart at a glance. Each OAR intersection sub-structure (e.g., `zR1_in_Rectum`) inherits the color of its parent ring for instant visual traceability.
+* **Input Validation:** Distance, thickness, and skin margin fields are validated before generation. If a field contains an invalid number, the script lists exactly which fields need fixing instead of failing with an unhandled error.
 * **Efficient UI Workflow:** Features a fast "zero-click" approach. Rings with a thickness set to `0.0` are automatically bypassed, allowing for rapid generation of 1, 2, or 3 rings without navigating extra drop-down menus.
 
 ## 💻 System Requirements
