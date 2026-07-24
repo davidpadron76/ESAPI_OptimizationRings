@@ -42,7 +42,8 @@ namespace VMS.TPS
 
             // 2. Clasificar estructuras para las listas
             var possiblePTVs = ss.Structures.Where(s => s.Id.ToUpper().Contains("PTV") || s.DicomType == "PTV").ToList();
-            var possibleOARs = ss.Structures.Where(s => !s.IsEmpty && s.DicomType != "EXTERNAL" && !possiblePTVs.Contains(s)).OrderBy(s => s.Id).ToList();
+            var possiblePTVsSet = new HashSet<Structure>(possiblePTVs);
+            var possibleOARs = ss.Structures.Where(s => !s.IsEmpty && s.DicomType != "EXTERNAL" && !possiblePTVsSet.Contains(s)).OrderBy(s => s.Id).ToList();
 
             if (!possiblePTVs.Any())
             {
@@ -143,17 +144,25 @@ namespace VMS.TPS
                 }
 
                 // ESAPI Best Practice: Use InvariantCulture so commas/dots don't break parsing on European machines
-                double[] startDists = new double[] { 
-                    double.Parse(txtR1Start.Text, CultureInfo.InvariantCulture), 
-                    double.Parse(txtR2Start.Text, CultureInfo.InvariantCulture), 
-                    double.Parse(txtR3Start.Text, CultureInfo.InvariantCulture) 
-                };
-                double[] thicknesses = new double[] { 
-                    double.Parse(txtR1Thick.Text, CultureInfo.InvariantCulture), 
-                    double.Parse(txtR2Thick.Text, CultureInfo.InvariantCulture), 
-                    double.Parse(txtR3Thick.Text, CultureInfo.InvariantCulture) 
-                };
-                double skinFlash = double.Parse(txtSkinFlash.Text, CultureInfo.InvariantCulture);
+                var parseErrors = new List<string>();
+                double r1Start, r2Start, r3Start, r1Thick, r2Thick, r3Thick, skinFlash;
+                TryParseField(txtR1Start, "zRing1 - Start Dist", parseErrors, out r1Start);
+                TryParseField(txtR2Start, "zRing2 - Start Dist", parseErrors, out r2Start);
+                TryParseField(txtR3Start, "zRing3 - Start Dist", parseErrors, out r3Start);
+                TryParseField(txtR1Thick, "zRing1 - Thickness", parseErrors, out r1Thick);
+                TryParseField(txtR2Thick, "zRing2 - Thickness", parseErrors, out r2Thick);
+                TryParseField(txtR3Thick, "zRing3 - Thickness", parseErrors, out r3Thick);
+                TryParseField(txtSkinFlash, "Skin Retraction Margin", parseErrors, out skinFlash);
+
+                if (parseErrors.Any())
+                {
+                    MessageBox.Show("Los siguientes campos no contienen un número válido:\n\n- " + string.Join("\n- ", parseErrors),
+                                    "Error de Validación", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                double[] startDists = new double[] { r1Start, r2Start, r3Start };
+                double[] thicknesses = new double[] { r1Thick, r2Thick, r3Thick };
 
                 mainWindow.DialogResult = true;
                 mainWindow.Close();
@@ -295,6 +304,16 @@ namespace VMS.TPS
         // =========================================================================
         // MÉTODOS AUXILIARES
         // =========================================================================
+        private bool TryParseField(TextBox box, string fieldLabel, List<string> errors, out double value)
+        {
+            if (double.TryParse(box.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out value))
+            {
+                return true;
+            }
+            errors.Add(fieldLabel);
+            return false;
+        }
+
         private void RemoveStructureIfExists(StructureSet ss, string id)
         {
             var target = ss.Structures.FirstOrDefault(s => s.Id == id);
