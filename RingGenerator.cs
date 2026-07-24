@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 using VMS.TPS.Common.Model.API;
 using VMS.TPS.Common.Model.Types;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Globalization;
 
 [assembly: AssemblyVersion("1.0.0.1")]
@@ -20,6 +21,14 @@ namespace VMS.TPS
 {
     public class Script
     {
+        // Un color distinto por anillo (zRing1, zRing2, zRing3) para identificarlos a simple vista
+        private static readonly Color[] RingColors = new Color[]
+        {
+            Colors.OrangeRed,
+            Colors.Gold,
+            Colors.DeepSkyBlue
+        };
+
         [MethodImpl(MethodImplOptions.NoInlining)]
         public void Execute(ScriptContext context)
         {
@@ -228,6 +237,8 @@ namespace VMS.TPS
                         continue;
                     }
 
+                    currentRing.Color = RingColors[i % RingColors.Length];
+
                     createdRings.Add(currentRing);
                     ringsGenerated++;
 
@@ -251,6 +262,7 @@ namespace VMS.TPS
                                 RemoveStructureIfExists(ss, intersectName);
                                 Structure intersectStruct = ss.AddStructure("CONTROL", intersectName);
                                 intersectStruct.SegmentVolume = intersection;
+                                intersectStruct.Color = currentRing.Color; // mismo color que su anillo principal
 
                                 // D: Restar la intersección del anillo principal
                                 currentRing.SegmentVolume = currentRing.SegmentVolume.Sub(intersection);
